@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GPU vs CPU Animations</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #1a1a1a;
+        color: #fff;
+        min-height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 24px;
+        font-size: 14px;
+      }
+      .fps-bar {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      .fps-item {
+        background: #2a2a2a;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .fps-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #4ade80;
+      }
+      .fps-label {
+        font-size: 12px;
+        color: #888;
+      }
+      .comparison {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .demo-card {
+        position: relative;
+        background: #252525;
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .demo-card h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+      }
+      .demo-card .method {
+        font-size: 13px;
+        margin-bottom: 16px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: inline-block;
+      }
+      .demo-card .method.cpu {
+        color: #f59e0b;
+        background: rgba(245, 158, 11, 0.15);
+      }
+      .demo-card .method.gpu {
+        color: #4ade80;
+        background: rgba(74, 222, 128, 0.15);
+      }
+      .grid-container {
+        --betGrid-height: 140px;
+        --gap-2x2: 4px;
+        --spot-radius: 12px;
+        /* 2x2 row height = 86px (50% of 180 - 4px); scale y = 86/140 to match width-height */
+        --scale-y-2x2: 0.614;
+        --counter-scale-y: 1.63;
+        width: 100%;
+        min-width: 320px;
+        height: 180px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      .betboard {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .bet-spot {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        border-radius: var(--spot-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 8px;
+      }
+      /* Plinko Paradise colors: blue, green, yellow, pink (--betSpot-background) */
+      .bet-spot:nth-child(1) {
+        background: linear-gradient(208deg, #36ebf2 41%, #00a1ff 96%);
+      }
+      .bet-spot:nth-child(2) {
+        background: linear-gradient(207deg, #3cff18 41%, #00b61e 96%);
+      }
+      .bet-spot:nth-child(3) {
+        background: linear-gradient(208deg, #fdf500 41%, #e19a00 96%);
+      }
+      .bet-spot:nth-child(4) {
+        background: linear-gradient(208deg, #ff7ea1 31%, #ff4a6c 96%);
+      }
+      .bet-spot-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      .bet-spot-inner {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ========== WIDTH/HEIGHT APPROACH (CPU) ========== */
+      /* left: 50% anchors at center; translate moves to final position */
+      /* 2x2: 4px gap between spots */
+      .width-height .bet-spot {
+        width: calc(50% - var(--gap-2x2));
+        height: calc(50% - var(--gap-2x2));
+        transition: width 500ms ease-in-out, height 500ms ease-in-out,
+          transform 500ms ease-in-out;
+      }
+      .width-height .bet-spot:nth-child(1) {
+        transform: translate(
+          calc(-100% - var(--gap-2x2)),
+          calc(-100% - var(--gap-2x2))
+        );
+      }
+      .width-height .bet-spot:nth-child(2) {
+        transform: translate(calc(-100% - var(--gap-2x2)), 0);
+      }
+      .width-height .bet-spot:nth-child(3) {
+        transform: translate(0, calc(-100% - var(--gap-2x2)));
+      }
+      .width-height .bet-spot:nth-child(4) {
+        transform: translate(0, 0);
+      }
+      /* 1x4: same gaps as width-height closed state */
+      .width-height.closed .bet-spot {
+        width: calc(25% - 6px);
+        height: var(--betGrid-height);
+        min-height: 68px;
+      }
+      .width-height.closed .bet-spot:nth-child(1) {
+        transform: translate(calc(-200% - 6px), 0);
+      }
+      .width-height.closed .bet-spot:nth-child(2) {
+        transform: translate(calc(-100% - 4px), 0);
+      }
+      .width-height.closed .bet-spot:nth-child(3) {
+        transform: translate(0, 0);
+      }
+      .width-height.closed .bet-spot:nth-child(4) {
+        transform: translate(calc(100% + 4px), 0);
+      }
+
+      /* ========== TRANSFORM/SCALE APPROACH (GPU) ========== */
+      /* Base size matches width-height closed; scale(2,0.5) for 2x2 */
+      /* Border-radius: 6px/19.5px pre-corrects for scale(2,0.614) → visual 12px circle */
+      .transform-scale .bet-spot {
+        width: calc(25% - 6px);
+        height: var(--betGrid-height);
+        min-height: 68px;
+        border-radius: 6px / 19.5px;
+        transform-origin: bottom center;
+        transition: transform 500ms ease-in-out, border-radius 500ms ease-in-out;
+      }
+      .transform-scale.closed .bet-spot {
+        border-radius: var(--spot-radius);
+      }
+      /* 2x2: left col -150%, right col +50%; top row -64%; scale y matches width-height (86px) */
+      .transform-scale .bet-spot:nth-child(1) {
+        transform: translate(calc(-150% - 6px), calc(-64% - 4px))
+          scale(2, var(--scale-y-2x2));
+      }
+      .transform-scale .bet-spot:nth-child(2) {
+        transform: translate(calc(-150% - 6px), 0) scale(2, var(--scale-y-2x2));
+      }
+      .transform-scale .bet-spot:nth-child(3) {
+        transform: translate(calc(50% + 3px), calc(-64% - 4px))
+          scale(2, var(--scale-y-2x2));
+      }
+      .transform-scale .bet-spot:nth-child(4) {
+        transform: translate(calc(50% + 3px), 0) scale(2, var(--scale-y-2x2));
+      }
+      /* 1x4: identical to width-height.closed; border-radius back to 12px */
+      .transform-scale.closed .bet-spot:nth-child(1) {
+        transform: translate(calc(-200% - 6px), 0);
+      }
+      .transform-scale.closed .bet-spot:nth-child(2) {
+        transform: translate(calc(-100% - 4px), 0);
+      }
+      .transform-scale.closed .bet-spot:nth-child(3) {
+        transform: translate(0, 0);
+      }
+      .transform-scale.closed .bet-spot:nth-child(4) {
+        transform: translate(calc(100% + 4px), 0);
+      }
+      /* Counter-scale: content stays normal size when parent scales in 2x2 */
+      .transform-scale .bet-spot .bet-spot-content {
+        transform: scale(0.5, var(--counter-scale-y));
+        transform-origin: bottom center;
+        transition: transform 500ms ease-in-out;
+      }
+      .transform-scale.closed .bet-spot .bet-spot-content {
+        transform: scale(1);
+      }
+
+      /* ========== CANVAS + TRANSFORM APPROACH (GPU) ========== */
+      /* Backgrounds on canvas (perfect corners), content in HTML; transform-only */
+      .canvas-transform .canvas-spot {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: calc(25% - 6px);
+        height: var(--betGrid-height);
+        min-height: 68px;
+        transform-origin: bottom center;
+        transition: transform 500ms ease-in-out;
+        pointer-events: none;
+      }
+      .canvas-transform .canvas-spot canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .canvas-transform .canvas-spot-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 8px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .canvas-transform .canvas-spot-content span {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+      /* 2x2: same layout as transform-scale */
+      .canvas-transform .canvas-spot:nth-child(1) {
+        transform: translate(calc(-150% - 6px), calc(-64% - 4px))
+          scale(2, var(--scale-y-2x2));
+      }
+      .canvas-transform .canvas-spot:nth-child(2) {
+        transform: translate(calc(-150% - 6px), 0) scale(2, var(--scale-y-2x2));
+      }
+      .canvas-transform .canvas-spot:nth-child(3) {
+        transform: translate(calc(50% + 3px), calc(-64% - 4px))
+          scale(2, var(--scale-y-2x2));
+      }
+      .canvas-transform .canvas-spot:nth-child(4) {
+        transform: translate(calc(50% + 3px), 0) scale(2, var(--scale-y-2x2));
+      }
+      .canvas-transform .canvas-spot .canvas-spot-content {
+        transform: scale(0.5, var(--counter-scale-y));
+        transform-origin: bottom center;
+        transition: transform 500ms ease-in-out;
+      }
+      /* 1x4 */
+      .canvas-transform.closed .canvas-spot:nth-child(1) {
+        transform: translate(calc(-200% - 6px), 0);
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(2) {
+        transform: translate(calc(-100% - 4px), 0);
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(3) {
+        transform: translate(0, 0);
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(4) {
+        transform: translate(calc(100% + 4px), 0);
+      }
+      .canvas-transform.closed .canvas-spot .canvas-spot-content {
+        transform: scale(1);
+      }
+
+      .toggle-btn {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        margin-top: 12px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background: #3b82f6;
+        color: white;
+        transition: background 0.2s;
+      }
+      .toggle-btn:hover {
+        background: #2563eb;
+      }
+      .toggle-btn:active {
+        background: #1d4ed8;
+      }
+      .instructions {
+        max-width: 600px;
+        margin: 24px auto 0;
+        padding: 16px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #aaa;
+        line-height: 1.5;
+      }
+      .instructions strong {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GPU vs CPU Animations</h1>
+    <p class="subtitle">
+      Compare width/height (CPU) vs transform/scale (GPU) — test on Safari
+      mobile for impact
+    </p>
+
+    <div class="fps-bar">
+      <div class="fps-item">
+        <div class="fps-value" id="fps">--</div>
+        <div class="fps-label">FPS</div>
+      </div>
+      <div class="fps-item">
+        <div class="fps-value" id="frameTime">--</div>
+        <div class="fps-label">Frame time (ms)</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="demo-card">
+        <h2>1. Width & Height</h2>
+        <div class="method cpu">Triggers layout/reflow every frame (CPU)</div>
+        <div class="grid-container width-height" id="gridWidthHeight">
+          <div class="betboard">
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">1</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">2</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">3</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="toggle-btn" id="btnWidthHeight">
+          Toggle: Bets Open (2×2)
+        </button>
+      </div>
+
+      <div class="demo-card">
+        <h2>2. Transform & Scale</h2>
+        <div class="method gpu">GPU-accelerated, compositor only</div>
+        <div class="grid-container transform-scale" id="gridTransformScale">
+          <div class="betboard">
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">1</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">2</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">3</span>
+              </div>
+            </div>
+            <div class="bet-spot">
+              <div class="bet-spot-content">
+                <span class="bet-spot-inner">4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="toggle-btn" id="btnTransformScale">
+          Toggle: Bets Open (2×2)
+        </button>
+      </div>
+
+      <div class="demo-card">
+        <h2>3. Canvas + Transform</h2>
+        <div class="method gpu">
+          Canvas backgrounds + HTML content, transform-only
+        </div>
+        <div class="grid-container canvas-transform" id="gridCanvas">
+          <div class="betboard">
+            <div class="canvas-spot" data-index="0">
+              <canvas></canvas>
+              <div class="canvas-spot-content"><span>1</span></div>
+            </div>
+            <div class="canvas-spot" data-index="1">
+              <canvas></canvas>
+              <div class="canvas-spot-content"><span>2</span></div>
+            </div>
+            <div class="canvas-spot" data-index="2">
+              <canvas></canvas>
+              <div class="canvas-spot-content"><span>3</span></div>
+            </div>
+            <div class="canvas-spot" data-index="3">
+              <canvas></canvas>
+              <div class="canvas-spot-content"><span>4</span></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="toggle-btn" id="btnCanvas">
+          Toggle: Bets Open (2×2)
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 24px">
+      <button
+        type="button"
+        class="toggle-btn"
+        id="btnBoth"
+        style="max-width: 280px; margin: 0 auto; background: #6366f1"
+      >
+        Stress: Run all three at once
+      </button>
+    </div>
+
+    <div class="instructions">
+      <strong>How to test:</strong> Open on Safari iOS or use Chrome DevTools
+      device emulation. Click each toggle during animation and watch FPS. Use
+      <strong>Stress</strong> to run both animations simultaneously — the
+      difference becomes obvious. Width/height causes layout thrashing;
+      transform/scale stays on the compositor.
+    </div>
+
+    <script>
+      function init() {
+        const gridWidthHeight = document.getElementById("gridWidthHeight");
+        const gridTransformScale =
+          document.getElementById("gridTransformScale");
+        const gridCanvas = document.getElementById("gridCanvas");
+        const btnWidthHeight = document.getElementById("btnWidthHeight");
+        const btnTransformScale = document.getElementById("btnTransformScale");
+        const btnCanvas = document.getElementById("btnCanvas");
+        const btnBoth = document.getElementById("btnBoth");
+
+        if (!btnWidthHeight || !btnTransformScale || !btnCanvas || !btnBoth) {
+          console.error("Missing button elements");
+          return;
+        }
+
+        function toggle(el, btn) {
+          if (!el || !btn) return;
+          el.classList.toggle("closed");
+          const closed = el.classList.contains("closed");
+          btn.textContent = closed
+            ? "Toggle: Bets Closed (1×4)"
+            : "Toggle: Bets Open (2×2)";
+        }
+
+        btnWidthHeight.addEventListener("click", () =>
+          toggle(gridWidthHeight, btnWidthHeight)
+        );
+        btnTransformScale.addEventListener("click", () =>
+          toggle(gridTransformScale, btnTransformScale)
+        );
+        btnCanvas.addEventListener("click", () => {
+          toggle(gridCanvas, btnCanvas);
+          drawCanvasSpots();
+        });
+        btnBoth.addEventListener("click", () => {
+          toggle(gridWidthHeight, btnWidthHeight);
+          toggle(gridTransformScale, btnTransformScale);
+          toggle(gridCanvas, btnCanvas);
+          drawCanvasSpots();
+        });
+
+        var SPOT_COLORS = [
+          {
+            stops: [
+              [0.41, "#36ebf2"],
+              [0.96, "#00a1ff"],
+            ],
+          },
+          {
+            stops: [
+              [0.41, "#3cff18"],
+              [0.96, "#00b61e"],
+            ],
+          },
+          {
+            stops: [
+              [0.41, "#fdf500"],
+              [0.96, "#e19a00"],
+            ],
+          },
+          {
+            stops: [
+              [0.31, "#ff7ea1"],
+              [0.96, "#ff4a6c"],
+            ],
+          },
+        ];
+
+        function drawRoundedRect(ctx, x, y, w, h, rX, rY) {
+          ctx.beginPath();
+          ctx.moveTo(x + rX, y);
+          ctx.lineTo(x + w - rX, y);
+          ctx.ellipse(x + w - rX, y + rY, rX, rY, 0, -Math.PI / 2, 0);
+          ctx.lineTo(x + w, y + h - rY);
+          ctx.ellipse(x + w - rX, y + h - rY, rX, rY, 0, 0, Math.PI / 2);
+          ctx.lineTo(x + rX, y + h);
+          ctx.ellipse(x + rX, y + h - rY, rX, rY, 0, Math.PI / 2, Math.PI);
+          ctx.lineTo(x, y + rY);
+          ctx.ellipse(x + rX, y + rY, rX, rY, 0, Math.PI, (3 * Math.PI) / 2);
+          ctx.closePath();
+        }
+
+        function drawCanvasSpots() {
+          try {
+            if (!gridCanvas) return;
+            const spots = gridCanvas.querySelectorAll(".canvas-spot");
+            const closed = gridCanvas.classList.contains("closed");
+            const rX = closed ? 12 : 6;
+            const rY = closed ? 12 : 19.5;
+
+            spots.forEach((spot, i) => {
+              const canvas = spot.querySelector("canvas");
+              if (!canvas) return;
+              const dpr = window.devicePixelRatio || 1;
+              const rect = canvas.getBoundingClientRect();
+              const w = rect.width;
+              const h = rect.height;
+              if (w <= 0 || h <= 0) return;
+              canvas.width = w * dpr;
+              canvas.height = h * dpr;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) return;
+              ctx.scale(dpr, dpr);
+
+              const g = ctx.createLinearGradient(w, 0, 0, h);
+              SPOT_COLORS[i].stops.forEach(function (stop) {
+                g.addColorStop(stop[0], stop[1]);
+              });
+              ctx.fillStyle = g;
+              drawRoundedRect(ctx, 0, 0, w, h, rX, rY);
+              ctx.fill();
+            });
+          } catch (e) {
+            console.warn("drawCanvasSpots error:", e);
+          }
+        }
+
+        if (gridCanvas) {
+          try {
+            new ResizeObserver(drawCanvasSpots).observe(gridCanvas);
+          } catch (e) {
+            console.warn("ResizeObserver error:", e);
+          }
+          requestAnimationFrame(() => drawCanvasSpots());
+        }
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+
+      let frameCount = 0;
+      let lastTime = performance.now();
+      let fps = 0;
+      let frameTime = 0;
+
+      function measureFrame() {
+        frameCount++;
+        const now = performance.now();
+        const delta = now - lastTime;
+        if (delta >= 1000) {
+          fps = Math.round((frameCount * 1000) / delta);
+          frameCount = 0;
+          lastTime = now;
+        }
+        frameTime = delta;
+      }
+
+      function updateDisplay() {
+        measureFrame();
+        document.getElementById("fps").textContent = fps || "--";
+        document.getElementById("frameTime").textContent = frameTime.toFixed(1);
+        requestAnimationFrame(updateDisplay);
+      }
+      requestAnimationFrame(updateDisplay);
+    </script>
+  </body>
+</html>

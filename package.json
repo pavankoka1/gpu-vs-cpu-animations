@@ -1,0 +1,6 @@
+{
+  "name": "gpu-vs-cpu-animations",
+  "version": "1.0.0",
+  "description": "Compare GPU vs CPU animation performance",
+  "private": true
+}
