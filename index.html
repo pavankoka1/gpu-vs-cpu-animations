@@ -4,97 +4,635 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GPU vs CPU Animations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --bg: #08090d;
+        --surface: rgba(18, 20, 26, 0.92);
+        --surface-card: rgba(24, 27, 35, 0.95);
+        --border: rgba(99, 102, 241, 0.15);
+        --accent: #6366f1;
+        --accent-soft: rgba(99, 102, 241, 0.2);
+        --cpu: #f59e0b;
+        --cpu-soft: rgba(245, 158, 11, 0.15);
+        --gpu: #22c55e;
+        --gpu-soft: rgba(34, 197, 94, 0.15);
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --font-sans: "DM Sans", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+        --transition-duration: 500ms;
+        --transition-easing: cubic-bezier(0.42, 0, 0.58, 1);
+        --stagger: 20ms;
+      }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
         padding: 20px;
-        font-family: system-ui, -apple-system, sans-serif;
-        background: #1a1a1a;
-        color: #fff;
+        font-family: var(--font-sans);
+        background: var(--bg);
+        color: var(--text);
         min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+      .bg-wrap {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      /* Gradient mesh — Vercel/Linear style */
+      .bg-gradient {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+        background: radial-gradient(
+            ellipse 50% 50% at 30% 20%,
+            rgba(99, 102, 241, 0.22) 0%,
+            rgba(99, 102, 241, 0.06) 50%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 45% 55% at 70% 80%,
+            rgba(34, 197, 94, 0.18) 0%,
+            rgba(34, 197, 94, 0.04) 50%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 50% 50%,
+            rgba(139, 92, 246, 0.12) 0%,
+            transparent 60%
+          );
+        animation: bgMesh 25s var(--transition-easing) infinite;
+      }
+      /* Floating orbs */
+      .bg-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: 0.45;
+        animation: bgOrb 18s var(--transition-easing) infinite;
+      }
+      .bg-orb-1 {
+        width: 380px;
+        height: 380px;
+        top: -15%;
+        left: -8%;
+        background: rgba(99, 102, 241, 0.4);
+        animation-duration: 20s;
+      }
+      .bg-orb-2 {
+        width: 300px;
+        height: 300px;
+        top: 20%;
+        right: -8%;
+        background: rgba(139, 92, 246, 0.35);
+        animation-delay: -7s;
+        animation-duration: 22s;
+      }
+      .bg-orb-3 {
+        width: 340px;
+        height: 340px;
+        bottom: -15%;
+        left: 5%;
+        background: rgba(34, 197, 94, 0.3);
+        animation-delay: -14s;
+        animation-duration: 24s;
+      }
+      /* Constellation dots — elegant dot field instead of plain lines */
+      .bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+            circle at center,
+            rgba(99, 102, 241, 0.5) 0,
+            rgba(99, 102, 241, 0.2) 0.5px,
+            transparent 1.5px
+          ),
+          radial-gradient(
+            circle at center,
+            rgba(139, 92, 246, 0.35) 0,
+            transparent 1px
+          );
+        background-size: 36px 36px, 72px 72px;
+        background-position: 0 0, 18px 18px;
+        mask-image: radial-gradient(
+          ellipse 100% 100% at 50% 50%,
+          black 5%,
+          transparent 78%
+        );
+        animation: gridPulse 8s var(--transition-easing) infinite;
+      }
+      /* Floating particles — soft glowing orbs, not plain lines */
+      .bg-particle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        box-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+      }
+      .bg-particle-1 {
+        width: 4px;
+        height: 4px;
+        top: 12%;
+        left: 18%;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 0.9) 0%,
+          rgba(99, 102, 241, 0.3) 70%,
+          transparent 100%
+        );
+        color: rgba(99, 102, 241, 0.4);
+        animation: particleDrift1 14s var(--transition-easing) infinite;
+      }
+      .bg-particle-2 {
+        width: 3px;
+        height: 3px;
+        top: 28%;
+        right: 22%;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.95) 0%,
+          rgba(139, 92, 246, 0.25) 70%,
+          transparent 100%
+        );
+        color: rgba(139, 92, 246, 0.35);
+        animation: particleDrift2 18s var(--transition-easing) infinite;
+        animation-delay: -3s;
+      }
+      .bg-particle-3 {
+        width: 5px;
+        height: 5px;
+        bottom: 35%;
+        left: 8%;
+        background: radial-gradient(
+          circle,
+          rgba(34, 197, 94, 0.85) 0%,
+          rgba(34, 197, 94, 0.2) 70%,
+          transparent 100%
+        );
+        color: rgba(34, 197, 94, 0.3);
+        animation: particleDrift3 16s var(--transition-easing) infinite;
+        animation-delay: -6s;
+      }
+      .bg-particle-4 {
+        width: 2px;
+        height: 2px;
+        top: 45%;
+        left: 45%;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 1) 0%,
+          rgba(99, 102, 241, 0.15) 70%,
+          transparent 100%
+        );
+        color: rgba(99, 102, 241, 0.25);
+        animation: particleDrift4 12s var(--transition-easing) infinite;
+        animation-delay: -2s;
+      }
+      .bg-particle-5 {
+        width: 4px;
+        height: 4px;
+        top: 62%;
+        right: 15%;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.9) 0%,
+          rgba(139, 92, 246, 0.2) 70%,
+          transparent 100%
+        );
+        color: rgba(139, 92, 246, 0.3);
+        animation: particleDrift5 20s var(--transition-easing) infinite;
+        animation-delay: -9s;
+      }
+      .bg-particle-6 {
+        width: 3px;
+        height: 3px;
+        bottom: 22%;
+        right: 35%;
+        background: radial-gradient(
+          circle,
+          rgba(34, 197, 94, 0.9) 0%,
+          rgba(34, 197, 94, 0.18) 70%,
+          transparent 100%
+        );
+        color: rgba(34, 197, 94, 0.28);
+        animation: particleDrift6 15s var(--transition-easing) infinite;
+        animation-delay: -4s;
+      }
+      .bg-particle-7 {
+        width: 2px;
+        height: 2px;
+        top: 8%;
+        right: 8%;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 0.95) 0%,
+          rgba(99, 102, 241, 0.12) 70%,
+          transparent 100%
+        );
+        color: rgba(99, 102, 241, 0.2);
+        animation: particleDrift7 22s var(--transition-easing) infinite;
+      }
+      .bg-particle-8 {
+        width: 4px;
+        height: 4px;
+        bottom: 55%;
+        left: 28%;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.85) 0%,
+          rgba(139, 92, 246, 0.18) 70%,
+          transparent 100%
+        );
+        color: rgba(139, 92, 246, 0.35);
+        animation: particleDrift8 17s var(--transition-easing) infinite;
+        animation-delay: -7s;
+      }
+      .bg-particle-9 {
+        width: 3px;
+        height: 3px;
+        top: 75%;
+        left: 12%;
+        background: radial-gradient(
+          circle,
+          rgba(34, 197, 94, 0.9) 0%,
+          rgba(34, 197, 94, 0.15) 70%,
+          transparent 100%
+        );
+        color: rgba(34, 197, 94, 0.25);
+        animation: particleDrift9 19s var(--transition-easing) infinite;
+        animation-delay: -5s;
+      }
+      .bg-particle-10 {
+        width: 2px;
+        height: 2px;
+        top: 38%;
+        right: 5%;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 0.95) 0%,
+          rgba(99, 102, 241, 0.12) 70%,
+          transparent 100%
+        );
+        color: rgba(99, 102, 241, 0.22);
+        animation: particleDrift10 13s var(--transition-easing) infinite;
+        animation-delay: -1s;
+      }
+      @keyframes particleDrift1 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translate(24px, -18px) scale(1.4);
+          opacity: 0.7;
+        }
+        50% {
+          transform: translate(-12px, 22px) scale(0.8);
+          opacity: 1;
+        }
+        75% {
+          transform: translate(18px, 8px) scale(1.2);
+          opacity: 0.85;
+        }
+      }
+      @keyframes particleDrift2 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        33% {
+          transform: translate(-20px, 15px) scale(1.3);
+          opacity: 0.6;
+        }
+        66% {
+          transform: translate(15px, -25px) scale(0.9);
+          opacity: 1;
+        }
+      }
+      @keyframes particleDrift3 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        20% {
+          transform: translate(30px, 12px) scale(1.25);
+          opacity: 0.8;
+        }
+        40% {
+          transform: translate(-15px, -20px) scale(0.85);
+          opacity: 1;
+        }
+        60% {
+          transform: translate(-8px, 28px) scale(1.15);
+          opacity: 0.9;
+        }
+        80% {
+          transform: translate(22px, -10px) scale(0.95);
+          opacity: 1;
+        }
+      }
+      @keyframes particleDrift4 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translate(18px, -22px) scale(1.5);
+          opacity: 0.5;
+        }
+      }
+      @keyframes particleDrift5 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translate(-28px, -12px) scale(1.2);
+          opacity: 0.75;
+        }
+        50% {
+          transform: translate(10px, 25px) scale(0.9);
+          opacity: 1;
+        }
+        75% {
+          transform: translate(20px, -14px) scale(1.1);
+          opacity: 0.85;
+        }
+      }
+      @keyframes particleDrift6 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        33% {
+          transform: translate(14px, 18px) scale(1.35);
+          opacity: 0.7;
+        }
+        66% {
+          transform: translate(-22px, -8px) scale(0.85);
+          opacity: 1;
+        }
+      }
+      @keyframes particleDrift7 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translate(-16px, 30px) scale(1.4);
+          opacity: 0.6;
+        }
+      }
+      @keyframes particleDrift8 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translate(20px, -15px) scale(1.15);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translate(-25px, 10px) scale(0.9);
+          opacity: 1;
+        }
+        75% {
+          transform: translate(-10px, -22px) scale(1.25);
+          opacity: 0.75;
+        }
+      }
+      @keyframes particleDrift9 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        33% {
+          transform: translate(-18px, -20px) scale(1.2);
+          opacity: 0.85;
+        }
+        66% {
+          transform: translate(25px, 12px) scale(0.88);
+          opacity: 1;
+        }
+      }
+      @keyframes particleDrift10 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translate(12px, 20px) scale(1.3);
+          opacity: 0.7;
+        }
+        75% {
+          transform: translate(-20px, -14px) scale(0.9);
+          opacity: 1;
+        }
+      }
+      /* Frame — dev tools / viewport aesthetic */
+      .bg-brackets {
+        position: absolute;
+        inset: 16px;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 6px;
+        animation: bracketPulse 5s var(--transition-easing) infinite;
+      }
+      .bg-brackets::before {
+        content: "◈";
+        position: absolute;
+        top: 8px;
+        left: 12px;
+        font-size: 8px;
+        color: rgba(99, 102, 241, 0.5);
+        letter-spacing: 0.15em;
+      }
+      .bg-brackets::after {
+        content: "GPU";
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 500;
+        color: rgba(34, 197, 94, 0.5);
+        letter-spacing: 0.2em;
+      }
+      @keyframes bgMesh {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(4%, -2%) scale(1.05);
+        }
+        50% {
+          transform: translate(-3%, 3%) scale(0.97);
+        }
+        75% {
+          transform: translate(2%, 1%) scale(1.02);
+        }
+      }
+      @keyframes bgOrb {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(25px, -35px) scale(1.15);
+        }
+        50% {
+          transform: translate(-30px, 25px) scale(0.92);
+        }
+        75% {
+          transform: translate(20px, 20px) scale(1.08);
+        }
+      }
+      @keyframes gridPulse {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes bracketPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+          border-color: rgba(99, 102, 241, 0.1);
+        }
+        50% {
+          opacity: 1;
+          border-color: rgba(99, 102, 241, 0.18);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bg-gradient,
+        .bg-orb,
+        .bg-grid,
+        .bg-particle,
+        .bg-brackets {
+          animation: none;
+        }
+      }
+      .page-content {
+        position: relative;
+        z-index: 1;
       }
       h1 {
         text-align: center;
         margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 1.75rem;
+        letter-spacing: -0.02em;
       }
       .subtitle {
         text-align: center;
-        color: #888;
-        margin-bottom: 24px;
-        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+        font-size: 0.95rem;
+        font-weight: 400;
       }
       .fps-bar {
         display: flex;
         justify-content: center;
-        gap: 40px;
-        margin-bottom: 24px;
+        gap: 24px;
+        margin-bottom: 28px;
         flex-wrap: wrap;
       }
       .fps-item {
-        background: #2a2a2a;
-        padding: 12px 24px;
-        border-radius: 8px;
+        background: var(--surface);
+        padding: 14px 28px;
+        border-radius: 12px;
         text-align: center;
+        border: 1px solid var(--border);
       }
       .fps-value {
-        font-size: 28px;
-        font-weight: bold;
-        color: #4ade80;
+        font-size: 1.75rem;
+        font-weight: 600;
+        font-family: var(--font-mono);
+        color: var(--gpu);
       }
       .fps-label {
-        font-size: 12px;
-        color: #888;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
       }
       .comparison {
         display: flex;
         flex-direction: column;
-        gap: 32px;
-        max-width: 400px;
+        gap: 28px;
+        max-width: 420px;
         margin: 0 auto;
       }
       .demo-card {
         position: relative;
-        background: #252525;
-        border-radius: 12px;
+        background: var(--surface-card);
+        border-radius: 16px;
         padding: 24px;
+        border: 1px solid var(--border);
       }
       .demo-card h2 {
-        margin: 0 0 4px 0;
-        font-size: 20px;
+        margin: 0 0 6px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
       }
       .demo-card .method {
-        font-size: 13px;
+        font-size: 0.8rem;
         margin-bottom: 16px;
-        padding: 6px 10px;
-        border-radius: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
         display: inline-block;
+        font-weight: 500;
       }
       .demo-card .method.cpu {
-        color: #f59e0b;
-        background: rgba(245, 158, 11, 0.15);
+        color: var(--cpu);
+        background: var(--cpu-soft);
       }
       .demo-card .method.gpu {
-        color: #4ade80;
-        background: rgba(74, 222, 128, 0.15);
+        color: var(--gpu);
+        background: var(--gpu-soft);
       }
       .grid-container {
         --betGrid-height: 140px;
+        --gap: 4px;
         --gap-2x2: 4px;
         --spot-radius: 12px;
-        /* 2x2 row height = 86px (50% of 180 - 4px); scale y = 86/140 to match width-height */
         --scale-y-2x2: 0.614;
         --counter-scale-y: 1.63;
         width: 100%;
         min-width: 320px;
         height: 180px;
-        background: #1e1e1e;
-        border-radius: 8px;
+        background: rgba(15, 18, 24, 0.8);
+        border-radius: 12px;
         position: relative;
         overflow: hidden;
         isolation: isolate;
+        border: 1px solid var(--border);
       }
       .betboard {
         position: relative;
@@ -142,118 +680,250 @@
       }
 
       /* ========== WIDTH/HEIGHT APPROACH (CPU) ========== */
-      /* left: 50% anchors at center; translate moves to final position */
-      /* 2x2: 4px gap between spots */
       .width-height .bet-spot {
-        width: calc(50% - var(--gap-2x2));
-        height: calc(50% - var(--gap-2x2));
-        transition: width 500ms ease-in-out, height 500ms ease-in-out,
-          transform 500ms ease-in-out;
+        width: calc(50% - var(--gap));
+        height: calc(50% - var(--gap));
       }
       .width-height .bet-spot:nth-child(1) {
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc((3 - 0) * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc((3 - 0) * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc((3 - 0) * var(--stagger));
         transform: translate(
-          calc(-100% - var(--gap-2x2)),
-          calc(-100% - var(--gap-2x2))
+          calc(-100% - var(--gap)),
+          calc(-100% - var(--gap))
         );
       }
       .width-height .bet-spot:nth-child(2) {
-        transform: translate(calc(-100% - var(--gap-2x2)), 0);
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc((3 - 1) * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc((3 - 1) * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc((3 - 1) * var(--stagger));
+        transform: translate(calc(-100% - var(--gap)), 0);
       }
       .width-height .bet-spot:nth-child(3) {
-        transform: translate(0, calc(-100% - var(--gap-2x2)));
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc((3 - 2) * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc((3 - 2) * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc((3 - 2) * var(--stagger));
+        transform: translate(0, calc(-100% - var(--gap)));
       }
       .width-height .bet-spot:nth-child(4) {
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc((3 - 3) * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc((3 - 3) * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc((3 - 3) * var(--stagger));
         transform: translate(0, 0);
       }
-      /* 1x4: same gaps as width-height closed state */
       .width-height.closed .bet-spot {
-        width: calc(25% - 6px);
+        width: calc(25% - 3 * var(--gap) / 4);
         height: var(--betGrid-height);
         min-height: 68px;
       }
       .width-height.closed .bet-spot:nth-child(1) {
-        transform: translate(calc(-200% - 6px), 0);
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc(0 * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc(0 * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc(0 * var(--stagger));
+        transform: translate(calc(-200% - 2 * var(--gap)), 0);
       }
       .width-height.closed .bet-spot:nth-child(2) {
-        transform: translate(calc(-100% - 4px), 0);
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc(1 * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc(1 * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc(1 * var(--stagger));
+        transform: translate(calc(-100% - var(--gap)), 0);
       }
       .width-height.closed .bet-spot:nth-child(3) {
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc(2 * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc(2 * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc(2 * var(--stagger));
         transform: translate(0, 0);
       }
       .width-height.closed .bet-spot:nth-child(4) {
-        transform: translate(calc(100% + 4px), 0);
+        transition: width var(--transition-duration) var(--transition-easing)
+            calc(3 * var(--stagger)),
+          height var(--transition-duration) var(--transition-easing)
+            calc(3 * var(--stagger)),
+          transform var(--transition-duration) var(--transition-easing)
+            calc(3 * var(--stagger));
+        transform: translate(calc(100% + var(--gap)), 0);
       }
 
       /* ========== TRANSFORM/SCALE APPROACH (GPU) ========== */
-      /* Base size matches width-height closed; scale(2,0.5) for 2x2 */
-      /* Border-radius: 6px/19.5px pre-corrects for scale(2,0.614) → visual 12px circle */
       .transform-scale .bet-spot {
-        width: calc(25% - 6px);
+        width: calc(25% - 3 * var(--gap) / 4);
         height: var(--betGrid-height);
         min-height: 68px;
         border-radius: 6px / 19.5px;
         transform-origin: bottom center;
-        transition: transform 500ms ease-in-out, border-radius 500ms ease-in-out;
+      }
+      .transform-scale .bet-spot:nth-child(1) {
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc((3 - 0) * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc((3 - 0) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(2) {
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc((3 - 1) * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc((3 - 1) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(3) {
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc((3 - 2) * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc((3 - 2) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(4) {
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc((3 - 3) * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc((3 - 3) * var(--stagger));
       }
       .transform-scale.closed .bet-spot {
         border-radius: var(--spot-radius);
       }
-      /* 2x2: left col -150%, right col +50%; top row -64%; scale y matches width-height (86px) */
+      /* 2x2: left col -150%, right col +50%; top row -64%; scale y matches width-height */
       .transform-scale .bet-spot:nth-child(1) {
-        transform: translate(calc(-150% - 6px), calc(-64% - 4px))
+        transform: translate(
+            calc(-150% - 1.5 * var(--gap)),
+            calc(-64% - var(--gap))
+          )
           scale(2, var(--scale-y-2x2));
       }
       .transform-scale .bet-spot:nth-child(2) {
-        transform: translate(calc(-150% - 6px), 0) scale(2, var(--scale-y-2x2));
+        transform: translate(calc(-150% - 1.5 * var(--gap)), 0)
+          scale(2, var(--scale-y-2x2));
       }
       .transform-scale .bet-spot:nth-child(3) {
-        transform: translate(calc(50% + 3px), calc(-64% - 4px))
+        transform: translate(
+            calc(50% + var(--gap) / 2),
+            calc(-64% - var(--gap))
+          )
           scale(2, var(--scale-y-2x2));
       }
       .transform-scale .bet-spot:nth-child(4) {
-        transform: translate(calc(50% + 3px), 0) scale(2, var(--scale-y-2x2));
+        transform: translate(calc(50% + var(--gap) / 2), 0)
+          scale(2, var(--scale-y-2x2));
       }
-      /* 1x4: identical to width-height.closed; border-radius back to 12px */
       .transform-scale.closed .bet-spot:nth-child(1) {
-        transform: translate(calc(-200% - 6px), 0);
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc(0 * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc(0 * var(--stagger));
+        transform: translate(calc(-200% - 2 * var(--gap)), 0);
       }
       .transform-scale.closed .bet-spot:nth-child(2) {
-        transform: translate(calc(-100% - 4px), 0);
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc(1 * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc(1 * var(--stagger));
+        transform: translate(calc(-100% - var(--gap)), 0);
       }
       .transform-scale.closed .bet-spot:nth-child(3) {
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc(2 * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc(2 * var(--stagger));
         transform: translate(0, 0);
       }
       .transform-scale.closed .bet-spot:nth-child(4) {
-        transform: translate(calc(100% + 4px), 0);
+        transition: transform var(--transition-duration)
+            var(--transition-easing) calc(3 * var(--stagger)),
+          border-radius var(--transition-duration) var(--transition-easing)
+            calc(3 * var(--stagger));
+        transform: translate(calc(100% + var(--gap)), 0);
       }
-      /* Counter-scale: content stays normal size when parent scales in 2x2 */
       .transform-scale .bet-spot .bet-spot-content {
         transform: scale(0.5, var(--counter-scale-y));
         transform-origin: bottom center;
-        transition: transform 500ms ease-in-out;
+      }
+      .transform-scale .bet-spot:nth-child(1) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 0) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(2) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 1) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(3) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 2) * var(--stagger));
+      }
+      .transform-scale .bet-spot:nth-child(4) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 3) * var(--stagger));
       }
       .transform-scale.closed .bet-spot .bet-spot-content {
         transform: scale(1);
       }
+      .transform-scale.closed .bet-spot:nth-child(1) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(0 * var(--stagger));
+      }
+      .transform-scale.closed .bet-spot:nth-child(2) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(1 * var(--stagger));
+      }
+      .transform-scale.closed .bet-spot:nth-child(3) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(2 * var(--stagger));
+      }
+      .transform-scale.closed .bet-spot:nth-child(4) .bet-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(3 * var(--stagger));
+      }
 
       /* ========== CANVAS + TRANSFORM APPROACH (GPU) ========== */
-      /* Backgrounds on canvas (perfect corners), content in HTML; transform-only */
       .canvas-transform .canvas-spot {
         position: absolute;
         left: 50%;
         bottom: 0;
-        width: calc(25% - 6px);
+        width: calc(25% - 3 * var(--gap) / 4);
         height: var(--betGrid-height);
         min-height: 68px;
         transform-origin: bottom center;
-        transition: transform 500ms ease-in-out;
         pointer-events: none;
+      }
+      .canvas-transform .canvas-spot:nth-child(1) {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 0) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(2) {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 1) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(3) {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 2) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(4) {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 3) * var(--stagger));
       }
       .canvas-transform .canvas-spot canvas {
         display: block;
         width: 100%;
         height: 100%;
         pointer-events: none;
+        backface-visibility: hidden;
       }
       .canvas-transform .canvas-spot-content {
         position: absolute;
@@ -273,208 +943,282 @@
       }
       /* 2x2: same layout as transform-scale */
       .canvas-transform .canvas-spot:nth-child(1) {
-        transform: translate(calc(-150% - 6px), calc(-64% - 4px))
+        transform: translate(
+            calc(-150% - 1.5 * var(--gap)),
+            calc(-64% - var(--gap))
+          )
           scale(2, var(--scale-y-2x2));
       }
       .canvas-transform .canvas-spot:nth-child(2) {
-        transform: translate(calc(-150% - 6px), 0) scale(2, var(--scale-y-2x2));
+        transform: translate(calc(-150% - 1.5 * var(--gap)), 0)
+          scale(2, var(--scale-y-2x2));
       }
       .canvas-transform .canvas-spot:nth-child(3) {
-        transform: translate(calc(50% + 3px), calc(-64% - 4px))
+        transform: translate(
+            calc(50% + var(--gap) / 2),
+            calc(-64% - var(--gap))
+          )
           scale(2, var(--scale-y-2x2));
       }
       .canvas-transform .canvas-spot:nth-child(4) {
-        transform: translate(calc(50% + 3px), 0) scale(2, var(--scale-y-2x2));
+        transform: translate(calc(50% + var(--gap) / 2), 0)
+          scale(2, var(--scale-y-2x2));
       }
       .canvas-transform .canvas-spot .canvas-spot-content {
         transform: scale(0.5, var(--counter-scale-y));
         transform-origin: bottom center;
-        transition: transform 500ms ease-in-out;
+      }
+      .canvas-transform .canvas-spot:nth-child(1) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 0) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(2) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 1) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(3) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 2) * var(--stagger));
+      }
+      .canvas-transform .canvas-spot:nth-child(4) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc((3 - 3) * var(--stagger));
       }
       /* 1x4 */
       .canvas-transform.closed .canvas-spot:nth-child(1) {
-        transform: translate(calc(-200% - 6px), 0);
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(0 * var(--stagger));
+        transform: translate(calc(-200% - 2 * var(--gap)), 0);
       }
       .canvas-transform.closed .canvas-spot:nth-child(2) {
-        transform: translate(calc(-100% - 4px), 0);
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(1 * var(--stagger));
+        transform: translate(calc(-100% - var(--gap)), 0);
       }
       .canvas-transform.closed .canvas-spot:nth-child(3) {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(2 * var(--stagger));
         transform: translate(0, 0);
       }
       .canvas-transform.closed .canvas-spot:nth-child(4) {
-        transform: translate(calc(100% + 4px), 0);
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(3 * var(--stagger));
+        transform: translate(calc(100% + var(--gap)), 0);
       }
       .canvas-transform.closed .canvas-spot .canvas-spot-content {
         transform: scale(1);
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(1) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(0 * var(--stagger));
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(2) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(1 * var(--stagger));
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(3) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(2 * var(--stagger));
+      }
+      .canvas-transform.closed .canvas-spot:nth-child(4) .canvas-spot-content {
+        transition: transform var(--transition-duration)
+          var(--transition-easing) calc(3 * var(--stagger));
       }
 
       .toggle-btn {
         position: relative;
         z-index: 10;
         width: 100%;
-        margin-top: 12px;
-        padding: 10px 16px;
-        font-size: 14px;
+        margin-top: 14px;
+        padding: 12px 18px;
+        font-size: 0.9rem;
         font-weight: 600;
+        font-family: var(--font-sans);
         cursor: pointer;
         border: none;
-        border-radius: 8px;
-        background: #3b82f6;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), #4f46e5);
         color: white;
-        transition: background 0.2s;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
       .toggle-btn:hover {
-        background: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px var(--accent-soft);
       }
       .toggle-btn:active {
-        background: #1d4ed8;
+        transform: translateY(0);
       }
       .instructions {
-        max-width: 600px;
-        margin: 24px auto 0;
-        padding: 16px;
-        background: #2a2a2a;
-        border-radius: 8px;
-        font-size: 13px;
-        color: #aaa;
-        line-height: 1.5;
+        max-width: 520px;
+        margin: 28px auto 0;
+        padding: 18px 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.6;
       }
       .instructions strong {
-        color: #fff;
+        color: var(--text);
       }
     </style>
   </head>
   <body>
-    <h1>GPU vs CPU Animations</h1>
-    <p class="subtitle">
-      Compare width/height (CPU) vs transform/scale (GPU) — test on Safari
-      mobile for impact
-    </p>
-
-    <div class="fps-bar">
-      <div class="fps-item">
-        <div class="fps-value" id="fps">--</div>
-        <div class="fps-label">FPS</div>
-      </div>
-      <div class="fps-item">
-        <div class="fps-value" id="frameTime">--</div>
-        <div class="fps-label">Frame time (ms)</div>
-      </div>
+    <div class="bg-wrap" aria-hidden="true">
+      <div class="bg-gradient"></div>
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="bg-orb bg-orb-3"></div>
+      <div class="bg-grid"></div>
+      <div class="bg-particle bg-particle-1"></div>
+      <div class="bg-particle bg-particle-2"></div>
+      <div class="bg-particle bg-particle-3"></div>
+      <div class="bg-particle bg-particle-4"></div>
+      <div class="bg-particle bg-particle-5"></div>
+      <div class="bg-particle bg-particle-6"></div>
+      <div class="bg-particle bg-particle-7"></div>
+      <div class="bg-particle bg-particle-8"></div>
+      <div class="bg-particle bg-particle-9"></div>
+      <div class="bg-particle bg-particle-10"></div>
+      <div class="bg-brackets"></div>
     </div>
+    <div class="page-content">
+      <h1>GPU vs CPU Animations</h1>
+      <p class="subtitle">
+        Compare width/height (CPU) vs transform/scale (GPU) — test on Safari
+        mobile for impact
+      </p>
 
-    <div class="comparison">
-      <div class="demo-card">
-        <h2>1. Width & Height</h2>
-        <div class="method cpu">Triggers layout/reflow every frame (CPU)</div>
-        <div class="grid-container width-height" id="gridWidthHeight">
-          <div class="betboard">
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">1</span>
+      <div class="fps-bar">
+        <div class="fps-item">
+          <div class="fps-value" id="fps">--</div>
+          <div class="fps-label">FPS</div>
+        </div>
+        <div class="fps-item">
+          <div class="fps-value" id="frameTime">--</div>
+          <div class="fps-label">Frame time (ms)</div>
+        </div>
+      </div>
+
+      <div class="comparison">
+        <div class="demo-card">
+          <h2>1. Width & Height</h2>
+          <div class="method cpu">Triggers layout/reflow every frame (CPU)</div>
+          <div class="grid-container width-height" id="gridWidthHeight">
+            <div class="betboard">
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">1</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">2</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">2</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">3</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">3</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">4</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">4</span>
+                </div>
               </div>
             </div>
           </div>
+          <button type="button" class="toggle-btn" id="btnWidthHeight">
+            Toggle: Bets Open (2×2)
+          </button>
         </div>
-        <button type="button" class="toggle-btn" id="btnWidthHeight">
-          Toggle: Bets Open (2×2)
-        </button>
-      </div>
 
-      <div class="demo-card">
-        <h2>2. Transform & Scale</h2>
-        <div class="method gpu">GPU-accelerated, compositor only</div>
-        <div class="grid-container transform-scale" id="gridTransformScale">
-          <div class="betboard">
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">1</span>
+        <div class="demo-card">
+          <h2>2. Transform & Scale</h2>
+          <div class="method gpu">GPU-accelerated, compositor only</div>
+          <div class="grid-container transform-scale" id="gridTransformScale">
+            <div class="betboard">
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">1</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">2</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">2</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">3</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">3</span>
+                </div>
               </div>
-            </div>
-            <div class="bet-spot">
-              <div class="bet-spot-content">
-                <span class="bet-spot-inner">4</span>
+              <div class="bet-spot">
+                <div class="bet-spot-content">
+                  <span class="bet-spot-inner">4</span>
+                </div>
               </div>
             </div>
           </div>
+          <button type="button" class="toggle-btn" id="btnTransformScale">
+            Toggle: Bets Open (2×2)
+          </button>
         </div>
-        <button type="button" class="toggle-btn" id="btnTransformScale">
-          Toggle: Bets Open (2×2)
-        </button>
-      </div>
 
-      <div class="demo-card">
-        <h2>3. Canvas + Transform</h2>
-        <div class="method gpu">
-          Canvas backgrounds + HTML content, transform-only
-        </div>
-        <div class="grid-container canvas-transform" id="gridCanvas">
-          <div class="betboard">
-            <div class="canvas-spot" data-index="0">
-              <canvas></canvas>
-              <div class="canvas-spot-content"><span>1</span></div>
-            </div>
-            <div class="canvas-spot" data-index="1">
-              <canvas></canvas>
-              <div class="canvas-spot-content"><span>2</span></div>
-            </div>
-            <div class="canvas-spot" data-index="2">
-              <canvas></canvas>
-              <div class="canvas-spot-content"><span>3</span></div>
-            </div>
-            <div class="canvas-spot" data-index="3">
-              <canvas></canvas>
-              <div class="canvas-spot-content"><span>4</span></div>
+        <div class="demo-card">
+          <h2>3. Canvas + Transform</h2>
+          <div class="method gpu">
+            Canvas backgrounds + HTML content, transform-only
+          </div>
+          <div class="grid-container canvas-transform" id="gridCanvas">
+            <div class="betboard">
+              <div class="canvas-spot" data-index="0">
+                <canvas></canvas>
+                <div class="canvas-spot-content"><span>1</span></div>
+              </div>
+              <div class="canvas-spot" data-index="1">
+                <canvas></canvas>
+                <div class="canvas-spot-content"><span>2</span></div>
+              </div>
+              <div class="canvas-spot" data-index="2">
+                <canvas></canvas>
+                <div class="canvas-spot-content"><span>3</span></div>
+              </div>
+              <div class="canvas-spot" data-index="3">
+                <canvas></canvas>
+                <div class="canvas-spot-content"><span>4</span></div>
+              </div>
             </div>
           </div>
+          <button type="button" class="toggle-btn" id="btnCanvas">
+            Toggle: Bets Open (2×2)
+          </button>
         </div>
-        <button type="button" class="toggle-btn" id="btnCanvas">
-          Toggle: Bets Open (2×2)
+      </div>
+
+      <div style="text-align: center; margin-top: 28px">
+        <button
+          type="button"
+          class="toggle-btn"
+          id="btnBoth"
+          style="
+            max-width: 300px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+          "
+        >
+          Stress: Run all three at once
         </button>
       </div>
-    </div>
 
-    <div style="text-align: center; margin-top: 24px">
-      <button
-        type="button"
-        class="toggle-btn"
-        id="btnBoth"
-        style="max-width: 280px; margin: 0 auto; background: #6366f1"
-      >
-        Stress: Run all three at once
-      </button>
-    </div>
-
-    <div class="instructions">
-      <strong>How to test:</strong> Open on Safari iOS or use Chrome DevTools
-      device emulation. Click each toggle during animation and watch FPS. Use
-      <strong>Stress</strong> to run both animations simultaneously — the
-      difference becomes obvious. Width/height causes layout thrashing;
-      transform/scale stays on the compositor.
+      <div class="instructions">
+        <strong>How to test:</strong> Open on Safari iOS or use Chrome DevTools
+        device emulation. Click each toggle during animation and watch FPS. Use
+        <strong>Stress</strong> to run all three simultaneously — the difference
+        becomes obvious. Width/height causes layout thrashing; transform/scale
+        stays on the compositor.
+      </div>
     </div>
 
     <script>
@@ -508,6 +1252,18 @@
         btnTransformScale.addEventListener("click", () =>
           toggle(gridTransformScale, btnTransformScale)
         );
+        function onCanvasTransitionEnd(e) {
+          if (
+            e.target.classList.contains("canvas-spot") &&
+            e.propertyName === "transform"
+          )
+            drawCanvasSpots();
+        }
+        if (gridCanvas) {
+          gridCanvas.querySelectorAll(".canvas-spot").forEach(function (spot) {
+            spot.addEventListener("transitionend", onCanvasTransitionEnd);
+          });
+        }
         btnCanvas.addEventListener("click", () => {
           toggle(gridCanvas, btnCanvas);
           drawCanvasSpots();
@@ -565,22 +1321,33 @@
             if (!gridCanvas) return;
             const spots = gridCanvas.querySelectorAll(".canvas-spot");
             const closed = gridCanvas.classList.contains("closed");
-            const rX = closed ? 12 : 6;
-            const rY = closed ? 12 : 19.5;
 
             spots.forEach((spot, i) => {
               const canvas = spot.querySelector("canvas");
               if (!canvas) return;
               const dpr = window.devicePixelRatio || 1;
-              const rect = canvas.getBoundingClientRect();
-              const w = rect.width;
-              const h = rect.height;
+              var w = canvas.offsetWidth;
+              var h = canvas.offsetHeight;
               if (w <= 0 || h <= 0) return;
               canvas.width = w * dpr;
               canvas.height = h * dpr;
               const ctx = canvas.getContext("2d");
               if (!ctx) return;
               ctx.scale(dpr, dpr);
+
+              var rX, rY;
+              if (closed) {
+                var maxR = Math.min(w, h) * 0.4;
+                rX = rY = Math.min(12, maxR);
+              } else {
+                rX = 6;
+                rY = 19.5;
+              }
+              rX = Math.min(rX, w / 2);
+              rY = Math.min(rY, h / 2);
+
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = "high";
 
               const g = ctx.createLinearGradient(w, 0, 0, h);
               SPOT_COLORS[i].stops.forEach(function (stop) {
