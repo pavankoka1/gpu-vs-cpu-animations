@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GPU vs CPU Animations</title>
+    <title>GPU vs CPU: five ways to animate the same UI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -35,7 +35,7 @@
       }
       body {
         margin: 0;
-        padding: 20px;
+        padding: 24px 18px 80px;
         font-family: var(--font-sans);
         background: var(--bg);
         color: var(--text);
@@ -530,6 +530,9 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
         .bg-gradient,
         .bg-orb,
         .bg-grid,
@@ -542,19 +545,135 @@
         position: relative;
         z-index: 1;
       }
-      h1 {
-        text-align: center;
-        margin-bottom: 8px;
-        font-weight: 600;
-        font-size: 1.75rem;
-        letter-spacing: -0.02em;
+      .blog-article {
+        max-width: 720px;
+        margin: 0 auto;
       }
-      .subtitle {
+      .blog-header {
         text-align: center;
+        margin-bottom: 36px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--border);
+      }
+      .blog-kicker {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        font-weight: 600;
+        margin: 0 0 12px 0;
+      }
+      h1 {
+        font-weight: 700;
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+        margin: 0 0 16px 0;
+        max-width: 22ch;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .blog-lead {
+        font-size: 1.08rem;
+        line-height: 1.65;
         color: var(--text-muted);
+        margin: 0 auto 12px;
+        max-width: 52ch;
+      }
+      .blog-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .blog-toc {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin-bottom: 32px;
+        font-size: 0.9rem;
+      }
+      .blog-toc strong {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+      .blog-toc ol {
+        margin: 0;
+        padding-left: 1.25rem;
+        line-height: 1.85;
+      }
+      .blog-toc a {
+        color: #a5b4fc;
+        text-decoration: none;
+      }
+      .blog-toc a:hover {
+        text-decoration: underline;
+      }
+      .blog-intro.prose {
         margin-bottom: 28px;
+      }
+      .blog-section {
+        margin-bottom: 48px;
+        scroll-margin-top: 24px;
+      }
+      .blog-section h2 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 12px 0;
+        line-height: 1.3;
+        color: var(--text);
+      }
+      .blog-section .section-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        display: block;
+      }
+      .prose {
         font-size: 0.95rem;
-        font-weight: 400;
+        line-height: 1.75;
+        color: var(--text-muted);
+      }
+      .prose p {
+        margin: 0 0 1rem 0;
+      }
+      .prose p:last-child {
+        margin-bottom: 0;
+      }
+      .prose ul,
+      .prose ol {
+        margin: 0 0 1rem 0;
+        padding-left: 1.35rem;
+      }
+      .prose li {
+        margin-bottom: 0.5rem;
+      }
+      .prose strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .prose code {
+        font-family: var(--font-mono);
+        font-size: 0.86em;
+        color: #c4b5fd;
+        background: rgba(99, 102, 241, 0.12);
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+      .prose .note {
+        font-size: 0.88rem;
+        padding: 14px 16px;
+        background: rgba(99, 102, 241, 0.08);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 8px 8px 0;
+        margin: 1rem 0;
       }
       .fps-bar {
         display: flex;
@@ -585,21 +704,22 @@
       .comparison {
         display: flex;
         flex-direction: column;
-        gap: 28px;
-        max-width: 420px;
-        margin: 0 auto;
+        gap: 0;
+        max-width: 520px;
+        margin: 20px auto 0;
       }
       .demo-card {
         position: relative;
         background: var(--surface-card);
         border-radius: 16px;
-        padding: 24px;
+        padding: 22px;
         border: 1px solid var(--border);
       }
-      .demo-card h2 {
-        margin: 0 0 6px 0;
-        font-size: 1.1rem;
-        font-weight: 600;
+      .demo-card__caption {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 14px 0 0 0;
+        line-height: 1.5;
       }
       .demo-card .method {
         font-size: 0.8rem;
@@ -901,6 +1021,7 @@
         min-height: 68px;
         transform-origin: bottom center;
         pointer-events: none;
+        will-change: transform;
       }
       .canvas-transform .canvas-spot:nth-child(1) {
         transition: transform var(--transition-duration)
@@ -924,6 +1045,7 @@
         height: 100%;
         pointer-events: none;
         backface-visibility: hidden;
+        transform: translateZ(0);
       }
       .canvas-transform .canvas-spot-content {
         position: absolute;
@@ -1048,18 +1170,66 @@
       .toggle-btn:active {
         transform: translateY(0);
       }
-      .instructions {
-        max-width: 520px;
-        margin: 28px auto 0;
+      html {
+        scroll-behavior: smooth;
+      }
+      .pick-guide {
+        max-width: 720px;
+        margin: 48px auto 0;
+        padding: 28px 26px 32px;
+        background: var(--surface-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .pick-guide h2 {
+        margin: 0 0 8px 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+      }
+      .pick-guide .prose {
+        margin-bottom: 24px;
+      }
+      .pick-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+      .pick-table th,
+      .pick-table td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      .pick-table th {
+        color: var(--text-muted);
+        font-weight: 500;
+        width: 28%;
+      }
+      .pick-table tr:last-child th,
+      .pick-table tr:last-child td {
+        border-bottom: none;
+      }
+      .pick-table td strong {
+        color: var(--text);
+      }
+      .stress-wrap {
+        text-align: center;
+        margin: 36px 0 8px;
+      }
+      .how-to-test {
+        max-width: 720px;
+        margin: 32px auto 0;
         padding: 18px 20px;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 12px;
-        font-size: 0.85rem;
+        font-size: 0.88rem;
         color: var(--text-muted);
-        line-height: 1.6;
+        line-height: 1.65;
       }
-      .instructions strong {
+      .how-to-test strong {
         color: var(--text);
       }
     </style>
@@ -1084,197 +1254,449 @@
       <div class="bg-brackets"></div>
     </div>
     <div class="page-content">
-      <h1>GPU vs CPU Animations</h1>
-      <p class="subtitle">
-        Compare width/height (CPU) vs transform/scale (GPU) — test on Safari
-        mobile for impact
-      </p>
+      <article class="blog-article">
+        <header class="blog-header">
+          <p class="blog-kicker">Interactive lab · Performance</p>
+          <h1>GPU vs CPU: five ways to animate the same UI</h1>
+          <p class="blog-lead">
+            We rebuild the same betting strip in five different ways: from
+            classic layout-driven animation to shader-based drawing. Each toggle
+            does the same thing visually — open four spots into a 2×2 grid, or
+            close them into a single row — but the browser does very different
+            work under the hood.
+          </p>
+          <p class="blog-meta">
+            Hands-on · about 12 minutes · best on mobile Safari or Chrome
+          </p>
+        </header>
 
-      <div class="fps-bar">
-        <div class="fps-item">
-          <div class="fps-value" id="fps">--</div>
-          <div class="fps-label">FPS</div>
-        </div>
-        <div class="fps-item">
-          <div class="fps-value" id="frameTime">--</div>
-          <div class="fps-label">Frame time (ms)</div>
-        </div>
-      </div>
+        <nav class="blog-toc" aria-label="Article sections">
+          <strong>In this article</strong>
+          <ol>
+            <li><a href="#layout-cpu">Width &amp; height (layout / CPU)</a></li>
+            <li>
+              <a href="#transform-gpu">Transform &amp; scale (compositor)</a>
+            </li>
+            <li><a href="#canvas-2d">Canvas 2D + CSS transform</a></li>
+            <li><a href="#canvas-buffer">Canvas + offscreen supersample</a></li>
+            <li><a href="#webgl-gpu">WebGL fragment shader</a></li>
+            <li><a href="#which-when">Which approach when?</a></li>
+          </ol>
+        </nav>
 
-      <div class="comparison">
-        <div class="demo-card">
-          <h2>1. Width & Height</h2>
-          <div class="method cpu">Triggers layout/reflow every frame (CPU)</div>
-          <div class="grid-container width-height" id="gridWidthHeight">
-            <div class="betboard">
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">1</span>
+        <div class="prose blog-intro">
+          <p>
+            <strong>What you’re looking at.</strong> Four coloured “bet spots”
+            sit on a fixed grid. <strong>Bets closed (1×4)</strong> shows one
+            row of four narrow tiles. <strong>Bets open (2×2)</strong> expands
+            them into a two-by-two layout. The animation uses the same duration,
+            easing, and stagger everywhere so comparisons stay fair.
+          </p>
+          <p>
+            <strong>Why it matters.</strong> On low-end phones, animating
+            <code>width</code> and <code>height</code> can force layout and
+            paint every frame. Animating <code>transform</code> and
+            <code>opacity</code>
+            usually stays on the compositor and costs less. Canvas and WebGL add
+            flexibility — gradients, games, effects — but you own pixels,
+            timing, and how they interact with CSS.
+          </p>
+        </div>
+
+        <div class="fps-bar">
+          <div class="fps-item">
+            <div class="fps-value" id="fps">--</div>
+            <div class="fps-label">FPS</div>
+          </div>
+          <div class="fps-item">
+            <div class="fps-value" id="frameTime">--</div>
+            <div class="fps-label">Frame time (ms)</div>
+          </div>
+        </div>
+
+        <section class="blog-section" id="layout-cpu">
+          <span class="section-label">Example 1 · Baseline</span>
+          <h2>Animating width and height (layout on the CPU)</h2>
+          <div class="prose">
+            <p>
+              Here we change the <strong>real layout geometry</strong> of each
+              tile: <code>width</code>, <code>height</code>, and
+              <code>transform</code> for position. Every frame the engine may
+              reflow siblings, recompute text, and repaint. That is the
+              traditional “main thread” path: flexible and easy to reason about,
+              but expensive when many things move at once.
+            </p>
+            <p>
+              <strong>What to watch.</strong> On a phone, hit the toggle during
+              the animation and watch FPS dip. Stress mode runs all five demos;
+              this one is usually the first to stutter.
+            </p>
+          </div>
+          <div class="comparison">
+            <div class="demo-card">
+              <div class="method cpu">Layout / reflow each frame</div>
+              <div class="grid-container width-height" id="gridWidthHeight">
+                <div class="betboard">
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">1</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">2</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">3</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">4</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">2</span>
-                </div>
-              </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">3</span>
-                </div>
-              </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">4</span>
-                </div>
-              </div>
+              <button type="button" class="toggle-btn" id="btnWidthHeight">
+                Toggle: Bets Open (2×2)
+              </button>
+              <p class="demo-card__caption">
+                Tiles use real width/height changes; the browser recomputes
+                layout as dimensions interpolate.
+              </p>
             </div>
           </div>
-          <button type="button" class="toggle-btn" id="btnWidthHeight">
-            Toggle: Bets Open (2×2)
-          </button>
-        </div>
+        </section>
 
-        <div class="demo-card">
-          <h2>2. Transform & Scale</h2>
-          <div class="method gpu">GPU-accelerated, compositor only</div>
-          <div class="grid-container transform-scale" id="gridTransformScale">
-            <div class="betboard">
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">1</span>
+        <section class="blog-section" id="transform-gpu">
+          <span class="section-label">Example 2 · Compositor</span>
+          <h2>Transform and scale (GPU-friendly)</h2>
+          <div class="prose">
+            <p>
+              The <strong>layout box</strong> of each tile stays the same size
+              as in the 1×4 strip. We only animate <code>transform</code> (move
+              + <code>scale</code>) and <code>border-radius</code>. The browser
+              promotes layers and interpolates matrices on the
+              <strong>compositor</strong>; there is no per-frame layout for the
+              size change.
+            </p>
+            <p>
+              <strong>Trade-off.</strong> You’re faking the 2×2 with scale and
+              counter-scale on labels so text stays readable. That’s a common
+              game UI trick: cheap motion, slightly more complex CSS.
+            </p>
+          </div>
+          <div class="comparison">
+            <div class="demo-card">
+              <div class="method gpu">Compositor · transform only</div>
+              <div
+                class="grid-container transform-scale"
+                id="gridTransformScale"
+              >
+                <div class="betboard">
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">1</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">2</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">3</span>
+                    </div>
+                  </div>
+                  <div class="bet-spot">
+                    <div class="bet-spot-content">
+                      <span class="bet-spot-inner">4</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">2</span>
-                </div>
-              </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">3</span>
-                </div>
-              </div>
-              <div class="bet-spot">
-                <div class="bet-spot-content">
-                  <span class="bet-spot-inner">4</span>
-                </div>
-              </div>
+              <button type="button" class="toggle-btn" id="btnTransformScale">
+                Toggle: Bets Open (2×2)
+              </button>
+              <p class="demo-card__caption">
+                Same motion as example 2, implemented with HTML/CSS only — no
+                canvas.
+              </p>
             </div>
           </div>
-          <button type="button" class="toggle-btn" id="btnTransformScale">
-            Toggle: Bets Open (2×2)
-          </button>
-        </div>
+        </section>
 
-        <div class="demo-card">
-          <h2>3. Canvas + Transform</h2>
-          <div class="method gpu">
-            Canvas backgrounds + HTML content, transform-only
+        <section class="blog-section" id="canvas-2d">
+          <span class="section-label">Example 3 · Bitmap</span>
+          <h2>Canvas 2D + the same CSS transform</h2>
+          <div class="prose">
+            <p>
+              Gradients are drawn with <strong>Canvas 2D</strong> into a bitmap;
+              labels stay as DOM on top. The spots still move with
+              <code>transform</code>, so motion stays compositor-friendly.
+            </p>
+            <p>
+              <strong>Catch.</strong> If the canvas only redraws once at the
+              start or end of the transition while <code>border-radius</code>
+              animates in CSS, corners and pixels fall out of sync — edges look
+              torn. This demo redraws every animation frame with radii and
+              timing matched to CSS so the bitmap tracks the rounded shape.
+            </p>
           </div>
-          <div class="grid-container canvas-transform" id="gridCanvas">
-            <div class="betboard">
-              <div class="canvas-spot" data-index="0">
-                <canvas></canvas>
-                <div class="canvas-spot-content"><span>1</span></div>
+          <div class="comparison">
+            <div class="demo-card">
+              <div class="method gpu">Canvas 2D + transform</div>
+              <div class="grid-container canvas-transform" id="gridCanvas">
+                <div class="betboard">
+                  <div class="canvas-spot" data-index="0">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>1</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="1">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>2</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="2">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>3</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="3">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>4</span></div>
+                  </div>
+                </div>
               </div>
-              <div class="canvas-spot" data-index="1">
-                <canvas></canvas>
-                <div class="canvas-spot-content"><span>2</span></div>
-              </div>
-              <div class="canvas-spot" data-index="2">
-                <canvas></canvas>
-                <div class="canvas-spot-content"><span>3</span></div>
-              </div>
-              <div class="canvas-spot" data-index="3">
-                <canvas></canvas>
-                <div class="canvas-spot-content"><span>4</span></div>
-              </div>
+              <button type="button" class="toggle-btn" id="btnCanvas">
+                Toggle: Bets Open (2×2)
+              </button>
+              <p class="demo-card__caption">
+                Gradient fills use <code>ellipse()</code> paths; radii
+                interpolate with the same easing as the CSS transition.
+              </p>
             </div>
           </div>
-          <button type="button" class="toggle-btn" id="btnCanvas">
-            Toggle: Bets Open (2×2)
+        </section>
+
+        <section class="blog-section" id="canvas-buffer">
+          <span class="section-label">Example 4 · Supersampling</span>
+          <h2>Canvas 2D with an offscreen 2× buffer</h2>
+          <div class="prose">
+            <p>
+              Same layout as example 3, but the rounded rect is drawn at
+              <strong>double resolution</strong> into an offscreen canvas, then
+              scaled down to the visible canvas with <code>drawImage</code>.
+              That gives better coverage on diagonal edges when the layer is
+              scaled non-uniformly in 2×2 mode.
+            </p>
+            <p>
+              <strong>Cost.</strong> More pixels to fill per frame than plain
+              2D, but still one composited layer and the same CSS motion path.
+            </p>
+          </div>
+          <div class="comparison">
+            <div class="demo-card">
+              <div class="method gpu">2× supersample → blit</div>
+              <div
+                class="grid-container canvas-transform"
+                id="gridCanvasBuffer"
+              >
+                <div class="betboard">
+                  <div class="canvas-spot" data-index="0">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>1</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="1">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>2</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="2">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>3</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="3">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>4</span></div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="toggle-btn" id="btnCanvasBuffer">
+                Toggle: Bets Open (2×2)
+              </button>
+              <p class="demo-card__caption">
+                Offscreen buffer reduces stair-stepping when CSS scales the
+                canvas texture.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="blog-section" id="webgl-gpu">
+          <span class="section-label">Example 5 · Shaders</span>
+          <h2>WebGL: gradient + rounded rectangle in a fragment shader</h2>
+          <div class="prose">
+            <p>
+              The fill is computed per pixel: a
+              <strong>signed distance field</strong> (SDF) for a rounded box, a
+              diagonal linear gradient in canvas space, and smooth anti-aliasing
+              at the edge. Radii and buffer size follow the same CSS
+              <code>scale</code> as the DOM so corners stay aligned while the
+              strip animates between 1×4 and 2×2.
+            </p>
+            <p>
+              <strong>Why bother.</strong> You get procedural control (effects,
+              video textures, particles) and predictable edges at the cost of
+              shader code, context setup, and fallbacks for older devices.
+            </p>
+          </div>
+          <div class="comparison">
+            <div class="demo-card">
+              <div class="method gpu">WebGL · SDF + gradient</div>
+              <div class="grid-container canvas-transform" id="gridWebGL">
+                <div class="betboard">
+                  <div class="canvas-spot" data-index="0">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>1</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="1">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>2</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="2">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>3</span></div>
+                  </div>
+                  <div class="canvas-spot" data-index="3">
+                    <canvas></canvas>
+                    <div class="canvas-spot-content"><span>4</span></div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="toggle-btn" id="btnWebGL">
+                Toggle: Bets Open (2×2)
+              </button>
+              <p class="demo-card__caption">
+                Pixels come from the GPU fragment stage; no Canvas 2D path API
+                on the hot fill.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="stress-wrap">
+          <button
+            type="button"
+            class="toggle-btn"
+            id="btnBoth"
+            style="
+              max-width: 320px;
+              background: linear-gradient(135deg, #7c3aed, #6366f1);
+            "
+          >
+            Stress: run all five at once
           </button>
+          <p class="blog-meta" style="margin-top: 14px">
+            Runs every demo in parallel — layout-heavy work becomes obvious.
+          </p>
         </div>
-      </div>
 
-      <div style="text-align: center; margin-top: 28px">
-        <button
-          type="button"
-          class="toggle-btn"
-          id="btnBoth"
-          style="
-            max-width: 300px;
-            margin: 0 auto;
-            background: linear-gradient(135deg, #7c3aed, #6366f1);
-          "
-        >
-          Stress: Run all three at once
-        </button>
-      </div>
+        <div class="how-to-test">
+          <strong>How to read the meters.</strong> FPS and frame time update
+          every second. Toggle while an animation is running; cheap approaches
+          hold steady, expensive ones hitch. On iOS Safari the gap between
+          example 1 and 2–5 is usually the clearest. Chrome’s device toolbar is
+          a useful second choice.
+        </div>
 
-      <div class="instructions">
-        <strong>How to test:</strong> Open on Safari iOS or use Chrome DevTools
-        device emulation. Click each toggle during animation and watch FPS. Use
-        <strong>Stress</strong> to run all three simultaneously — the difference
-        becomes obvious. Width/height causes layout thrashing; transform/scale
-        stays on the compositor.
-      </div>
+        <div class="prose" style="max-width: 720px; margin: 40px auto 0">
+          <p class="note">
+            <strong>Under the hood (short).</strong> The browser pipeline splits
+            roughly into <em>style → layout → paint → composite</em>.
+            <code>width</code>/<code>height</code> changes often pull you back
+            into layout. <code>transform</code> and <code>opacity</code> on a
+            promoted layer mostly skip to compositing. Canvas and WebGL hand you
+            a bitmap the compositor treats as a texture — your job is to keep
+            that bitmap consistent with anything CSS animates beside it.
+          </p>
+        </div>
+
+        <section class="pick-guide" id="which-when">
+          <h2>Which approach should you pick?</h2>
+          <div class="prose">
+            <p>
+              There is no single winner — it depends on whether you care most
+              about simplicity, lowest jank, pixel effects, or team skills. Use
+              this as a rule of thumb, then measure on your target devices.
+            </p>
+          </div>
+          <table class="pick-table">
+            <tbody>
+              <tr>
+                <th scope="row">Layout must be real</th>
+                <td>
+                  <strong>Width / height animation</strong> — when something
+                  actually needs to reflow (copy wrapping, flex/grid resolving,
+                  screen readers seeing true geometry) and the moving region is
+                  small or rare. Avoid as the main motion tool for large,
+                  always-on UI on weak devices.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Default UI motion</th>
+                <td>
+                  <strong>Transform + opacity</strong> — panels, drawers, HUD
+                  blocks, anything that can live on a compositor layer. Best
+                  trade-off of smoothness and authoring cost. Use
+                  <code>will-change</code> sparingly; don’t mix heavy layout
+                  animation on the same subtree.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Dynamic 2D pixels</th>
+                <td>
+                  <strong>Canvas 2D</strong> — charts, sprites, scratch areas,
+                  gradients you draw every frame. Keep DPR, resize, and
+                  raster/CSS timing in mind when transforms animate beside the
+                  bitmap.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Softer 2D edges</th>
+                <td>
+                  <strong>Offscreen supersample</strong> — same 2D API; draw
+                  big, blit small when CSS scales the canvas and edges look
+                  rough. Costs memory and fill rate.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Shaders &amp; effects</th>
+                <td>
+                  <strong>WebGL</strong> — lighting, blur passes, particles,
+                  custom AA. Heavier setup; test context loss and mobile GPUs.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="prose" style="margin-top: 20px">
+            <p>
+              <strong>Bottom line.</strong> Start with CSS
+              <code>transform</code> and <code>opacity</code> for motion. Reach
+              for layout animation only when the layout itself must change. Add
+              Canvas when pixels are dynamic; add WebGL when the GPU program is
+              the product. Measure on real hardware — this page is a lab, not a
+              substitute for profiling your app.
+            </p>
+          </div>
+        </section>
+      </article>
     </div>
 
     <script>
-      function init() {
-        const gridWidthHeight = document.getElementById("gridWidthHeight");
-        const gridTransformScale =
-          document.getElementById("gridTransformScale");
-        const gridCanvas = document.getElementById("gridCanvas");
-        const btnWidthHeight = document.getElementById("btnWidthHeight");
-        const btnTransformScale = document.getElementById("btnTransformScale");
-        const btnCanvas = document.getElementById("btnCanvas");
-        const btnBoth = document.getElementById("btnBoth");
-
-        if (!btnWidthHeight || !btnTransformScale || !btnCanvas || !btnBoth) {
-          console.error("Missing button elements");
-          return;
-        }
-
-        function toggle(el, btn) {
-          if (!el || !btn) return;
-          el.classList.toggle("closed");
-          const closed = el.classList.contains("closed");
-          btn.textContent = closed
-            ? "Toggle: Bets Closed (1×4)"
-            : "Toggle: Bets Open (2×2)";
-        }
-
-        btnWidthHeight.addEventListener("click", () =>
-          toggle(gridWidthHeight, btnWidthHeight)
-        );
-        btnTransformScale.addEventListener("click", () =>
-          toggle(gridTransformScale, btnTransformScale)
-        );
-        function onCanvasTransitionEnd(e) {
-          if (
-            e.target.classList.contains("canvas-spot") &&
-            e.propertyName === "transform"
-          )
-            drawCanvasSpots();
-        }
-        if (gridCanvas) {
-          gridCanvas.querySelectorAll(".canvas-spot").forEach(function (spot) {
-            spot.addEventListener("transitionend", onCanvasTransitionEnd);
-          });
-        }
-        btnCanvas.addEventListener("click", () => {
-          toggle(gridCanvas, btnCanvas);
-          drawCanvasSpots();
-        });
-        btnBoth.addEventListener("click", () => {
-          toggle(gridWidthHeight, btnWidthHeight);
-          toggle(gridTransformScale, btnTransformScale);
-          toggle(gridCanvas, btnCanvas);
-          drawCanvasSpots();
-        });
-
+      (function () {
+        var TRANSITION_MS = 500;
+        var STAGGER_MS = 20;
         var SPOT_COLORS = [
           {
             stops: [
@@ -1302,7 +1724,74 @@
           },
         ];
 
+        /** CSS cubic-bezier(0.42, 0, 0.58, 1): map linear time → eased progress */
+        function easeCssBezier(linearT) {
+          var x1 = 0.42,
+            y1 = 0,
+            x2 = 0.58,
+            y2 = 1;
+          if (linearT <= 0) return 0;
+          if (linearT >= 1) return 1;
+          var lo = 0,
+            hi = 1,
+            t = 0.5;
+          for (var k = 0; k < 12; k++) {
+            t = (lo + hi) * 0.5;
+            var cx = bezierComponent(t, 0, x1, x2, 1);
+            if (cx < linearT) lo = t;
+            else hi = t;
+          }
+          return bezierComponent(t, 0, y1, y2, 1);
+        }
+
+        function bezierComponent(t, p0, p1, p2, p3) {
+          var u = 1 - t;
+          return (
+            u * u * u * p0 +
+            3 * u * u * t * p1 +
+            3 * u * t * t * p2 +
+            t * t * t * p3
+          );
+        }
+
+        function staggerDelay(i, toClosed) {
+          return toClosed ? i * STAGGER_MS : (3 - i) * STAGGER_MS;
+        }
+
+        /** toClosed = target layout is 1×4 (closed); tEase ∈ [0,1] along CSS transition */
+        function radiiForProgress(toClosed, tEase) {
+          var rOpenX = 6,
+            rOpenY = 19.5;
+          var rClose = 12;
+          if (toClosed) {
+            return {
+              rx: rOpenX + (rClose - rOpenX) * tEase,
+              ry: rOpenY + (rClose - rOpenY) * tEase,
+            };
+          }
+          return {
+            rx: rClose + (rOpenX - rClose) * tEase,
+            ry: rClose + (rOpenY - rClose) * tEase,
+          };
+        }
+
+        /** Same eased progress as border-radius: (1,1) ↔ (scaleX, scaleY) for 1×4 ↔ 2×2. */
+        function scaleXYForOpenClose(toClosed, tEase, scaleX2x2, scaleY2x2) {
+          if (toClosed) {
+            return {
+              sx: scaleX2x2 + (1 - scaleX2x2) * tEase,
+              sy: scaleY2x2 + (1 - scaleY2x2) * tEase,
+            };
+          }
+          return {
+            sx: 1 + (scaleX2x2 - 1) * tEase,
+            sy: 1 + (scaleY2x2 - 1) * tEase,
+          };
+        }
+
         function drawRoundedRect(ctx, x, y, w, h, rX, rY) {
+          rX = Math.min(rX, w / 2);
+          rY = Math.min(rY, h / 2);
           ctx.beginPath();
           ctx.moveTo(x + rX, y);
           ctx.lineTo(x + w - rX, y);
@@ -1316,91 +1805,520 @@
           ctx.closePath();
         }
 
-        function drawCanvasSpots() {
-          try {
-            if (!gridCanvas) return;
-            const spots = gridCanvas.querySelectorAll(".canvas-spot");
-            const closed = gridCanvas.classList.contains("closed");
+        function finalRadii(closed, w, h) {
+          if (closed) {
+            var maxR = Math.min(w, h) * 0.4;
+            var r = Math.min(12, maxR);
+            return { rx: r, ry: r };
+          }
+          return { rx: 6, ry: 19.5 };
+        }
 
-            spots.forEach((spot, i) => {
-              const canvas = spot.querySelector("canvas");
-              if (!canvas) return;
-              const dpr = window.devicePixelRatio || 1;
-              var w = canvas.offsetWidth;
-              var h = canvas.offsetHeight;
-              if (w <= 0 || h <= 0) return;
-              canvas.width = w * dpr;
-              canvas.height = h * dpr;
-              const ctx = canvas.getContext("2d");
-              if (!ctx) return;
-              ctx.scale(dpr, dpr);
+        var bufferStore = new WeakMap();
 
-              var rX, rY;
-              if (closed) {
-                var maxR = Math.min(w, h) * 0.4;
-                rX = rY = Math.min(12, maxR);
-              } else {
-                rX = 6;
-                rY = 19.5;
+        function getOffscreen(wPx, hPx) {
+          var c = document.createElement("canvas");
+          c.width = wPx;
+          c.height = hPx;
+          return c;
+        }
+
+        function drawCanvas2D(grid, now, opts) {
+          opts = opts || {};
+          var supersample = opts.supersample ? 2 : 1;
+          var spots = grid.querySelectorAll(".canvas-spot");
+          var closed = grid.classList.contains("closed");
+          var animStart = opts.animStart;
+          var toClosed = opts.toClosed;
+
+          spots.forEach(function (spot, i) {
+            var canvas = spot.querySelector("canvas");
+            if (!canvas || canvas.dataset.webgl === "1") return;
+            var dpr = window.devicePixelRatio || 1;
+            var w = canvas.offsetWidth;
+            var h = canvas.offsetHeight;
+            if (w <= 0 || h <= 0) return;
+
+            var rX, rY;
+            if (animStart != null && toClosed != null) {
+              var delay = staggerDelay(i, toClosed);
+              var elapsed = now - animStart - delay;
+              var tLin =
+                elapsed <= 0
+                  ? 0
+                  : elapsed >= TRANSITION_MS
+                  ? 1
+                  : elapsed / TRANSITION_MS;
+              var tEase = easeCssBezier(tLin);
+              var pair = radiiForProgress(toClosed, tEase);
+              rX = pair.rx;
+              rY = pair.ry;
+            } else {
+              var fr = finalRadii(closed, w, h);
+              rX = fr.rx;
+              rY = fr.ry;
+            }
+            rX = Math.min(rX, w / 2);
+            rY = Math.min(rY, h / 2);
+
+            var vw = w * dpr;
+            var vh = h * dpr;
+            canvas.width = vw;
+            canvas.height = vh;
+            var ctx = canvas.getContext("2d", { alpha: true });
+            if (!ctx) return;
+
+            if (supersample > 1) {
+              var bw = Math.floor(vw * supersample);
+              var bh = Math.floor(vh * supersample);
+              var off = bufferStore.get(canvas);
+              if (!off || off.width !== bw || off.height !== bh) {
+                off = getOffscreen(bw, bh);
+                bufferStore.set(canvas, off);
               }
-              rX = Math.min(rX, w / 2);
-              rY = Math.min(rY, h / 2);
-
+              var octx = off.getContext("2d");
+              octx.setTransform(1, 0, 0, 1, 0, 0);
+              octx.clearRect(0, 0, bw, bh);
+              octx.scale(supersample * dpr, supersample * dpr);
+              octx.imageSmoothingEnabled = true;
+              octx.imageSmoothingQuality = "high";
+              var gw = octx.createLinearGradient(w, 0, 0, h);
+              SPOT_COLORS[i].stops.forEach(function (stop) {
+                gw.addColorStop(stop[0], stop[1]);
+              });
+              octx.fillStyle = gw;
+              drawRoundedRect(octx, 0, 0, w, h, rX, rY);
+              octx.fill();
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
               ctx.imageSmoothingEnabled = true;
               ctx.imageSmoothingQuality = "high";
-
-              const g = ctx.createLinearGradient(w, 0, 0, h);
+              ctx.clearRect(0, 0, vw, vh);
+              ctx.drawImage(off, 0, 0, bw, bh, 0, 0, vw, vh);
+            } else {
+              ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = "high";
+              ctx.clearRect(0, 0, w, h);
+              var g = ctx.createLinearGradient(w, 0, 0, h);
               SPOT_COLORS[i].stops.forEach(function (stop) {
                 g.addColorStop(stop[0], stop[1]);
               });
               ctx.fillStyle = g;
               drawRoundedRect(ctx, 0, 0, w, h, rX, rY);
               ctx.fill();
+            }
+          });
+        }
+
+        function hexToRgb(hex) {
+          var n = parseInt(hex.slice(1), 16);
+          return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        }
+
+        var glPrograms = new WeakMap();
+        var WEBGL_SHADER_VER = 4;
+
+        function getGlContext(canvas) {
+          return (
+            canvas.getContext("webgl2", {
+              alpha: true,
+              antialias: true,
+              premultipliedAlpha: true,
+            }) ||
+            canvas.getContext("webgl", {
+              alpha: true,
+              antialias: true,
+              premultipliedAlpha: true,
+            })
+          );
+        }
+
+        function compileShader(gl, type, src) {
+          var sh = gl.createShader(type);
+          gl.shaderSource(sh, src);
+          gl.compileShader(sh);
+          if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+            console.warn(gl.getShaderInfoLog(sh));
+            return null;
+          }
+          return sh;
+        }
+
+        function ensureWebGLProgram(canvas) {
+          if (glPrograms.has(canvas)) {
+            var cached = glPrograms.get(canvas);
+            if (cached.ver === WEBGL_SHADER_VER) return cached;
+            cached.gl.deleteProgram(cached.prog);
+            glPrograms.delete(canvas);
+          }
+          var gl = getGlContext(canvas);
+          if (!gl) return null;
+          var vertSrc =
+            "attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}";
+          var fragSrc = [
+            "precision highp float;",
+            "uniform vec2 u_resolution;",
+            "uniform vec2 u_radii;",
+            "uniform float u_stopA;",
+            "uniform float u_stopB;",
+            "uniform vec3 u_colA;",
+            "uniform vec3 u_colB;",
+            "uniform float u_aa;",
+            "",
+            "/* IQ round-box with per-axis corner radii (CSS border-radius: rx / ry).",
+            "   Canvas coords are y-down; gl_FragCoord is y-up — gradient uses GL corners.",
+            "   Scalar r replaced by sqrt(rx*ry) so circular rx==ry matches classic sdRoundBox. */",
+            "float sdRoundBoxElliptical(vec2 p,vec2 halfSize,vec2 rad){",
+            "rad=min(rad,halfSize);",
+            "vec2 q=abs(p)-(halfSize-rad);",
+            "float rm=sqrt(max(rad.x*rad.y,1e-8));",
+            "return length(max(q,0.0))+min(max(q.x,q.y),0.0)-rm;",
+            "}",
+            "",
+            "void main(){",
+            "vec2 halfSize=u_resolution*0.5;",
+            "vec2 p=gl_FragCoord.xy-u_resolution*0.5;",
+            "float d=sdRoundBoxElliptical(p,halfSize,u_radii);",
+            "float aa=max(1.0,u_aa);",
+            "float alpha=1.0-smoothstep(-aa,aa,d);",
+            "/* Canvas y-down; GL y-up — sample gradient in canvas space to match createLinearGradient(w,0,0,h). */",
+            "vec2 c=vec2(gl_FragCoord.x,u_resolution.y-gl_FragCoord.y);",
+            "vec2 c0=vec2(u_resolution.x,0.0);",
+            "vec2 c1=vec2(0.0,u_resolution.y);",
+            "vec2 vc=c1-c0;",
+            "float g=dot(c-c0,vc)/dot(vc,vc);",
+            "vec3 col;",
+            "if(g<=u_stopA)col=u_colA;",
+            "else if(g>=u_stopB)col=u_colB;",
+            "else col=mix(u_colA,u_colB,(g-u_stopA)/(u_stopB-u_stopA));",
+            "gl_FragColor=vec4(col,alpha);",
+            "}",
+          ].join("");
+          var vs = compileShader(gl, gl.VERTEX_SHADER, vertSrc);
+          var fs = compileShader(gl, gl.FRAGMENT_SHADER, fragSrc);
+          if (!vs || !fs) return null;
+          var prog = gl.createProgram();
+          gl.attachShader(prog, vs);
+          gl.attachShader(prog, fs);
+          gl.linkProgram(prog);
+          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+            console.warn(gl.getProgramInfoLog(prog));
+            return null;
+          }
+          glPrograms.set(canvas, { gl: gl, prog: prog, ver: WEBGL_SHADER_VER });
+          return glPrograms.get(canvas);
+        }
+
+        function drawWebGLGrid(grid, now, opts) {
+          opts = opts || {};
+          var animStart = opts.animStart;
+          var toClosed = opts.toClosed;
+          var closed = grid.classList.contains("closed");
+          var spots = grid.querySelectorAll(".canvas-spot");
+          /*
+           * 1×4: buffer = layout × dpr (matches on-screen; no extra scale).
+           * 2×2: CSS uses scale(2, var(--scale-y-2x2)) on the strip — drawing W×H then
+           * stretching non-uniformly blunts corners and wrong height. Render at the
+           * *post-transform* size (2W × scaleY·H) and scale border radii per axis like the compositor.
+           * During CSS transition, interpolate scale (and resMul) with the same tEase as radii.
+           */
+          var scaleY2x2 = parseFloat(
+            getComputedStyle(grid).getPropertyValue("--scale-y-2x2")
+          );
+          if (isNaN(scaleY2x2)) scaleY2x2 = 0.614;
+          var scaleX2x2 = 2;
+          var isTransition = animStart != null && typeof toClosed === "boolean";
+
+          spots.forEach(function (spot, i) {
+            var canvas = spot.querySelector("canvas");
+            if (!canvas) return;
+            canvas.dataset.webgl = "1";
+            var dpr = window.devicePixelRatio || 1;
+            var w = canvas.offsetWidth;
+            var h = canvas.offsetHeight;
+            if (w <= 0 || h <= 0) return;
+
+            var pair;
+            var tEase = 1;
+            if (isTransition) {
+              var delay = staggerDelay(i, toClosed);
+              var elapsed = now - animStart - delay;
+              var tLin =
+                elapsed <= 0
+                  ? 0
+                  : elapsed >= TRANSITION_MS
+                  ? 1
+                  : elapsed / TRANSITION_MS;
+              tEase = easeCssBezier(tLin);
+              pair = radiiForProgress(toClosed, tEase);
+            } else {
+              pair = finalRadii(closed, w, h);
+            }
+
+            var sx, sy;
+            if (isTransition) {
+              var sc = scaleXYForOpenClose(
+                toClosed,
+                tEase,
+                scaleX2x2,
+                scaleY2x2
+              );
+              sx = sc.sx;
+              sy = sc.sy;
+            } else if (closed) {
+              sx = 1;
+              sy = 1;
+            } else {
+              sx = scaleX2x2;
+              sy = scaleY2x2;
+            }
+
+            var resMul =
+              scaleX2x2 > 1.001
+                ? 1 +
+                  0.75 * Math.min(1, Math.max(0, (sx - 1) / (scaleX2x2 - 1)))
+                : 1;
+
+            var vw = Math.floor(w * sx * dpr * resMul);
+            var vh = Math.floor(h * sy * dpr * resMul);
+            if (canvas.width !== vw || canvas.height !== vh) {
+              canvas.width = vw;
+              canvas.height = vh;
+            }
+            var pack = ensureWebGLProgram(canvas);
+            if (!pack) return;
+            var gl = pack.gl;
+            var prog = pack.prog;
+
+            var rX = pair.rx * sx * dpr * resMul;
+            var rY = pair.ry * sy * dpr * resMul;
+
+            var stops = SPOT_COLORS[i].stops;
+            var cA = hexToRgb(stops[0][1]);
+            var cB = hexToRgb(stops[1][1]);
+            gl.viewport(0, 0, vw, vh);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.useProgram(prog);
+
+            var buf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.bufferData(
+              gl.ARRAY_BUFFER,
+              new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+              gl.STATIC_DRAW
+            );
+            var loc = gl.getAttribLocation(prog, "a_pos");
+            gl.enableVertexAttribArray(loc);
+            gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform2f(gl.getUniformLocation(prog, "u_resolution"), vw, vh);
+            gl.uniform2f(gl.getUniformLocation(prog, "u_radii"), rX, rY);
+            gl.uniform1f(gl.getUniformLocation(prog, "u_aa"), 1.35 * resMul);
+            gl.uniform1f(gl.getUniformLocation(prog, "u_stopA"), stops[0][0]);
+            gl.uniform1f(gl.getUniformLocation(prog, "u_stopB"), stops[1][0]);
+            gl.uniform3f(
+              gl.getUniformLocation(prog, "u_colA"),
+              cA[0] / 255,
+              cA[1] / 255,
+              cA[2] / 255
+            );
+            gl.uniform3f(
+              gl.getUniformLocation(prog, "u_colB"),
+              cB[0] / 255,
+              cB[1] / 255,
+              cB[2] / 255
+            );
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.deleteBuffer(buf);
+          });
+        }
+
+        var transitionRaf = null;
+
+        function runTransitionDraw(now) {
+          var tasks = runTransitionDraw.tasks;
+          if (!tasks || !tasks.length) {
+            transitionRaf = null;
+            return;
+          }
+          var done = true;
+          tasks.forEach(function (t) {
+            if (now < t.end) done = false;
+            var opts = {
+              animStart: t.start,
+              toClosed: t.toClosed,
+            };
+            if (t.mode === "2d") drawCanvas2D(t.grid, now, opts);
+            else if (t.mode === "buf")
+              drawCanvas2D(
+                t.grid,
+                now,
+                Object.assign({ supersample: true }, opts)
+              );
+            else if (t.mode === "gl") drawWebGLGrid(t.grid, now, opts);
+          });
+          if (done) {
+            runTransitionDraw.tasks = null;
+            transitionRaf = null;
+            tasks.forEach(function (t) {
+              if (t.mode === "2d") drawCanvas2D(t.grid, performance.now(), {});
+              else if (t.mode === "buf")
+                drawCanvas2D(t.grid, performance.now(), { supersample: true });
+              else if (t.mode === "gl")
+                drawWebGLGrid(t.grid, performance.now(), {});
             });
-          } catch (e) {
-            console.warn("drawCanvasSpots error:", e);
+            return;
           }
+          transitionRaf = requestAnimationFrame(runTransitionDraw);
         }
 
-        if (gridCanvas) {
-          try {
-            new ResizeObserver(drawCanvasSpots).observe(gridCanvas);
-          } catch (e) {
-            console.warn("ResizeObserver error:", e);
+        function startTransition(gridsConfig) {
+          var start = performance.now();
+          var end = start + TRANSITION_MS + 3 * STAGGER_MS + 8;
+          runTransitionDraw.tasks = gridsConfig.map(function (g) {
+            return {
+              grid: g.el,
+              mode: g.mode,
+              start: start,
+              end: end,
+              toClosed: g.toClosed,
+            };
+          });
+          if (transitionRaf) cancelAnimationFrame(transitionRaf);
+          transitionRaf = requestAnimationFrame(runTransitionDraw);
+        }
+
+        function init() {
+          var gridWidthHeight = document.getElementById("gridWidthHeight");
+          var gridTransformScale =
+            document.getElementById("gridTransformScale");
+          var gridCanvas = document.getElementById("gridCanvas");
+          var gridCanvasBuffer = document.getElementById("gridCanvasBuffer");
+          var gridWebGL = document.getElementById("gridWebGL");
+          var btnWidthHeight = document.getElementById("btnWidthHeight");
+          var btnTransformScale = document.getElementById("btnTransformScale");
+          var btnCanvas = document.getElementById("btnCanvas");
+          var btnCanvasBuffer = document.getElementById("btnCanvasBuffer");
+          var btnWebGL = document.getElementById("btnWebGL");
+          var btnBoth = document.getElementById("btnBoth");
+
+          if (
+            !btnWidthHeight ||
+            !btnTransformScale ||
+            !btnCanvas ||
+            !btnCanvasBuffer ||
+            !btnWebGL ||
+            !btnBoth
+          ) {
+            console.error("Missing button elements");
+            return;
           }
-          requestAnimationFrame(() => drawCanvasSpots());
+
+          function toggle(el, btn) {
+            if (!el || !btn) return;
+            var wasClosed = el.classList.contains("closed");
+            el.classList.toggle("closed");
+            var closed = el.classList.contains("closed");
+            btn.textContent = closed
+              ? "Toggle: Bets Closed (1×4)"
+              : "Toggle: Bets Open (2×2)";
+            return { wasClosed: wasClosed, closed: closed, toClosed: closed };
+          }
+
+          function bindCanvasGrid(grid, btn, mode) {
+            if (!grid || !btn) return;
+            function drawRest() {
+              if (mode === "2d") drawCanvas2D(grid, performance.now(), {});
+              else if (mode === "buf")
+                drawCanvas2D(grid, performance.now(), { supersample: true });
+              else if (mode === "gl")
+                drawWebGLGrid(grid, performance.now(), {});
+            }
+            grid.querySelectorAll(".canvas-spot").forEach(function (spot) {
+              spot.addEventListener("transitionend", function (e) {
+                if (
+                  e.target.classList.contains("canvas-spot") &&
+                  e.propertyName === "transform"
+                )
+                  drawRest();
+              });
+            });
+            try {
+              new ResizeObserver(drawRest).observe(grid);
+            } catch (e) {
+              console.warn("ResizeObserver error:", e);
+            }
+            btn.addEventListener("click", function () {
+              var prev = grid.classList.contains("closed");
+              toggle(grid, btn);
+              var toClosed = grid.classList.contains("closed");
+              startTransition([{ el: grid, mode: mode, toClosed: toClosed }]);
+            });
+            requestAnimationFrame(drawRest);
+          }
+
+          btnWidthHeight.addEventListener("click", function () {
+            toggle(gridWidthHeight, btnWidthHeight);
+          });
+          btnTransformScale.addEventListener("click", function () {
+            toggle(gridTransformScale, btnTransformScale);
+          });
+
+          bindCanvasGrid(gridCanvas, btnCanvas, "2d");
+          bindCanvasGrid(gridCanvasBuffer, btnCanvasBuffer, "buf");
+          bindCanvasGrid(gridWebGL, btnWebGL, "gl");
+
+          btnBoth.addEventListener("click", function () {
+            toggle(gridWidthHeight, btnWidthHeight);
+            toggle(gridTransformScale, btnTransformScale);
+            toggle(gridCanvas, btnCanvas);
+            toggle(gridCanvasBuffer, btnCanvasBuffer);
+            toggle(gridWebGL, btnWebGL);
+            var toClosed = gridCanvas.classList.contains("closed");
+            startTransition([
+              { el: gridCanvas, mode: "2d", toClosed: toClosed },
+              { el: gridCanvasBuffer, mode: "buf", toClosed: toClosed },
+              { el: gridWebGL, mode: "gl", toClosed: toClosed },
+            ]);
+          });
         }
-      }
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init);
-      } else {
-        init();
-      }
 
-      let frameCount = 0;
-      let lastTime = performance.now();
-      let fps = 0;
-      let frameTime = 0;
-
-      function measureFrame() {
-        frameCount++;
-        const now = performance.now();
-        const delta = now - lastTime;
-        if (delta >= 1000) {
-          fps = Math.round((frameCount * 1000) / delta);
-          frameCount = 0;
-          lastTime = now;
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
         }
-        frameTime = delta;
-      }
 
-      function updateDisplay() {
-        measureFrame();
-        document.getElementById("fps").textContent = fps || "--";
-        document.getElementById("frameTime").textContent = frameTime.toFixed(1);
+        var frameCount = 0;
+        var lastTime = performance.now();
+        var fps = 0;
+        var frameTime = 0;
+
+        function measureFrame() {
+          frameCount++;
+          var now = performance.now();
+          var delta = now - lastTime;
+          if (delta >= 1000) {
+            fps = Math.round((frameCount * 1000) / delta);
+            frameCount = 0;
+            lastTime = now;
+          }
+          frameTime = delta;
+        }
+
+        function updateDisplay() {
+          measureFrame();
+          var elFps = document.getElementById("fps");
+          var elFt = document.getElementById("frameTime");
+          if (elFps) elFps.textContent = fps || "--";
+          if (elFt) elFt.textContent = frameTime.toFixed(1);
+          requestAnimationFrame(updateDisplay);
+        }
         requestAnimationFrame(updateDisplay);
-      }
-      requestAnimationFrame(updateDisplay);
+      })();
     </script>
   </body>
 </html>
